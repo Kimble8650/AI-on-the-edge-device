@@ -139,5 +139,13 @@ void test_analogToDigit_ContinuousLastDigit() {
     // AnalogToDigitTransitionStart has no effect in this mode
     TEST_ASSERT_EQUAL_INT(7,  undertest->PointerEvalAnalogToDigitNew( 8.0, 9.88, 9, 6.0, true));
 
+    // Pointer read on the wrong side of 0; the analog evaluation (eval_predecessors) decides the side
+    // Pointer reads 9.8 but has passed 0 (eval 0): 9.0 - (-0.02) => erg=9 (not 8)
+    TEST_ASSERT_EQUAL_INT(9,  undertest->PointerEvalAnalogToDigitNew( 9.0, 9.8, 0, 9.2, true));
+    TEST_ASSERT_EQUAL_INT(0,  undertest->PointerEvalAnalogToDigitNew( 0.0, 9.8, 0, 9.2, true));
+    // Pointer reads 0.0 but has not passed 0 yet (eval 9): 8.98 - 1.0 => erg=8 (not 9)
+    TEST_ASSERT_EQUAL_INT(8,  undertest->PointerEvalAnalogToDigitNew( 8.98, 0.0, 9, 9.2, true));
+    TEST_ASSERT_EQUAL_INT(9,  undertest->PointerEvalAnalogToDigitNew( 9.98, 0.1, 9, 9.2, true));
+
     delete undertest;
 }

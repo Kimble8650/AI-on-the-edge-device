@@ -540,6 +540,24 @@ void test_doFlowPP_ContinuousLastDigit() {
         TEST_ASSERT_EQUAL_STRING("997.9683", result.c_str());
         delete undertestPost;
 
+        // ana1 reads 9.8 just after passing 0; ana2 shows it has passed (true value 999.0000)
+        digits = { 0.0, 9.0, 9.0, 9.0};
+        analogs = { 9.8, 0.1, 0.1, 0.2};
+        undertestPost = init_do_flow(analogs, digits, Digit100, false, false, 0);
+        setContinuousLastDigit(undertestPost, true);
+        result = process_doFlow(undertestPost);
+        TEST_ASSERT_EQUAL_STRING("999.0000", result.c_str());
+        delete undertestPost;
+
+        // ana1 reads 0.0 just before passing 0; ana2 shows it has not (true value 998.9801)
+        digits = { 0.0, 0.1, 9.1, 9.0, 8.98};
+        analogs = { 0.0, 8.01, 0.1, 1.0};
+        undertestPost = init_do_flow(analogs, digits, Digit100, false, false, 0);
+        setContinuousLastDigit(undertestPost, true);
+        result = process_doFlow(undertestPost);
+        TEST_ASSERT_EQUAL_STRING("998.9801", result.c_str());
+        delete undertestPost;
+
         // The two "last digit runs with the analog pointer" cases of test_doFlowPP3,
         // solved there with AnalogToDigitTransitionStart = 7.7, give the same
         // results with the default transition start and ContinuousLastDigit.

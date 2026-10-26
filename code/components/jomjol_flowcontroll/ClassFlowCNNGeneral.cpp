@@ -237,9 +237,26 @@ int ClassFlowCNNGeneral::PointerEvalAnalogToDigitNew(float number, float numeral
     // this tolerates +/-0.5 of combined reading error and wraps 9 <-> 0 in both directions.
     // AnalogToDigitTransitionStart is not used in this mode.
     if (ContinuousLastDigit) {
-        result = ((int) round(number - numeral_preceder / 10.0) + 10) % 10;
+        float pointer = numeral_preceder;
+
+        // Near 0 the pointer reading can be on the wrong side (e.g. 9.8 although the next pointer shows
+        // it has passed 0). The analog evaluation already resolved this (eval_predecessors), so move the
+        // reading to that side: 9.8 evaluated as 0 -> -0.2, 0.1 evaluated as 9 -> 10.1.
+        if (eval_predecessors >= 0) {
+            int pointer_before_decimal_point = (int) floor(pointer);
+
+            if (pointer_before_decimal_point - eval_predecessors >= 5) {
+                pointer -= 10;
+            }
+            else if (eval_predecessors - pointer_before_decimal_point >= 5) {
+                pointer += 10;
+            }
+        }
+
+        result = ((int) round(number - pointer / 10.0) + 10) % 10;
         LogFile.WriteToFile(ESP_LOG_DEBUG, TAG, "PointerEvalAnalogToDigitNew - Continuous last digit - Result = " + std::to_string(result) +
-                                                    " number: " + std::to_string(number) + " numeral_preceder = " + std::to_string(numeral_preceder));
+                                                    " number: " + std::to_string(number) + " numeral_preceder = " + std::to_string(numeral_preceder) +
+                                                    " eval_predecessors = " + std::to_string(eval_predecessors));
         return result;
     }
 
