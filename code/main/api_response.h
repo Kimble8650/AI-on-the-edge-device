@@ -20,6 +20,17 @@ esp_err_t api_send_accepted(httpd_req_t *req, cJSON *body);
 // Sends a 503 with Retry-After, for endpoints that need the flow before it's initialized.
 esp_err_t api_send_flow_not_ready(httpd_req_t *req);
 
+// Sends body as a 200 JSON response for a request that changed something, and deletes it.
+// Unlike api_send_json(), it has no CORS header: other sites may read the device but not change it.
+esp_err_t api_send_changed(httpd_req_t *req, cJSON *body);
+
+// Sends a 400 that names the field of the request body that is wrong, in error.fields.
+esp_err_t api_send_field_error(httpd_req_t *req, const char *field, const char *message);
+
+// Reads the request body as JSON, which the caller deletes.
+// Returns NULL if it can't, after sending a 413 for a body that's too long or a 400 otherwise.
+cJSON *api_receive_json(httpd_req_t *req);
+
 // Sends {"error": {"code": ..., "message": ...}} with the given HTTP status line, e.g. "404 Not Found".
 esp_err_t api_send_error(httpd_req_t *req, const char *status, const char *code, const char *message);
 
