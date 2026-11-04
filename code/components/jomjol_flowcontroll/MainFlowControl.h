@@ -80,6 +80,8 @@ void DeleteMainFlowTask(void);
 bool isSetupModusActive(void);
 
 int getCountFlowRounds(void);
+bool getFlowIsInitialized(void);
+bool getFlowIsRunning(void);
 
 #ifdef ENABLE_MQTT
 esp_err_t MQTTCtrlFlowStart(std::string _topic);

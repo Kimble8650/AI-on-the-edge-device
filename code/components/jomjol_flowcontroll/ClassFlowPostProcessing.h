@@ -11,6 +11,18 @@
 #include <string>
 #include <mutex>
 
+// Copy of the results of one number, as text, for reading outside the flow task
+struct NumberResult
+{
+    std::string name;
+    std::string value;
+    std::string raw;
+    std::string pre;
+    std::string error;
+    std::string rate;
+    std::string timestamp;
+};
+
 class ClassFlowPostProcessing :
     public ClassFlow
 {
@@ -69,6 +81,7 @@ public:
     bool SetPreValue(double zw, string _numbers, bool _extern = false);
 
     std::string GetJSON(std::string _lineend = "\n");
+    std::vector<NumberResult> GetResults();
     std::string getNumbersName();
 
     void UpdateNachkommaDecimalShift();

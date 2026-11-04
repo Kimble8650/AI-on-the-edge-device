@@ -23,19 +23,6 @@ extern std::string getHTMLversion(void);
 namespace
 {
 
-// Adds value as a string, or null if it's empty: a build without a tag has no GIT_TAG.
-void add_string_or_null(cJSON *object, const char *key, const char *value)
-{
-    if (value[0] == '\0')
-    {
-        cJSON_AddNullToObject(object, key);
-    }
-    else
-    {
-        cJSON_AddStringToObject(object, key, value);
-    }
-}
-
 // The SD card getters return numbers as text for /info?type=... Converting them here keeps one source for both.
 void add_number_from_text(cJSON *object, const char *key, const std::string &text)
 {
@@ -55,7 +42,7 @@ void add_firmware(cJSON *root)
     cJSON *firmware = cJSON_AddObjectToObject(root, "firmware");
     cJSON_AddStringToObject(firmware, "version", getFwVersion().c_str());
     cJSON_AddStringToObject(firmware, "branch", libfive_git_branch());
-    add_string_or_null(firmware, "tag", libfive_git_version());
+    api_add_string_or_null(firmware, "tag", libfive_git_version()); // A build without a tag has no GIT_TAG
     cJSON_AddStringToObject(firmware, "revision", libfive_git_revision());
     cJSON_AddStringToObject(firmware, "build_time", BUILD_TIME_UTC);
 }

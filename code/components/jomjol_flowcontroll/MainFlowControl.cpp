@@ -84,6 +84,16 @@ int getCountFlowRounds(void)
     return countRounds;
 }
 
+bool getFlowIsInitialized(void)
+{
+    return bTaskAutoFlowCreated && bFlowInitialized;
+}
+
+bool getFlowIsRunning(void)
+{
+    return flowisrunning;
+}
+
 esp_err_t GetJPG(std::string _filename, httpd_req_t *req)
 {
     return flowctrl.GetJPGStream(_filename, req);

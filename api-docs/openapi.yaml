@@ -35,6 +35,27 @@ paths:
         "405":
           $ref: "#/components/responses/MethodNotAllowed"
 
+  /status:
+    get:
+      summary: Latest readings and the state of the flow
+      description: |
+        Meant for polling. `flow.round` goes up when a round starts, so the readings of that
+        round are there once `flow.running` is false again.
+      operationId: getStatus
+      responses:
+        "200":
+          description: Readings and flow state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Status"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
 components:
   securitySchemes:
     basicAuth:
@@ -59,6 +80,18 @@ components:
           description: The methods the endpoint supports
           schema:
             type: string
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+    ServiceUnavailable:
+      description: The flow isn't initialized yet, for example just after a boot
+      headers:
+        Retry-After:
+          description: Seconds to wait before trying again
+          schema:
+            type: integer
       content:
         application/json:
           schema:
@@ -188,6 +221,62 @@ components:
               type: number
             partition_allocation_size_bytes:
               type: number
+
+    Status:
+      type: object
+      required: [flow, numbers]
+      properties:
+        flow:
+          type: object
+          required: [round, running, status]
+          properties:
+            round:
+              description: Rounds started since the boot
+              type: integer
+            running:
+              description: True while a round is being processed
+              type: boolean
+            status:
+              description: The current step, for showing to people
+              type: string
+              example: Flow finished
+        numbers:
+          description: One entry per number sequence, by name
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/NumberStatus"
+
+    NumberStatus:
+      type: object
+      required: [value, raw, pre, error, rate, timestamp]
+      properties:
+        value:
+          description: The latest reading. Null if there's none, for example after a failed check.
+          type: number
+          nullable: true
+        raw:
+          description: The reading as recognized, as text because it can contain `N` for an unreadable digit
+          type: string
+          nullable: true
+          example: "1001.9929"
+        pre:
+          description: The last valid reading
+          type: number
+          nullable: true
+        error:
+          description: Why the latest reading was rejected. Null if it wasn't.
+          type: string
+          nullable: true
+        rate:
+          description: Change per minute. Null if there's none.
+          type: number
+          nullable: true
+        timestamp:
+          description: Time of the last valid reading
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-11-04T19:19:57+02:00"
 
     HeapRegion:
       type: object

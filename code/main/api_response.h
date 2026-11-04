@@ -6,6 +6,9 @@
 #include <esp_http_server.h>
 #include <cJSON.h>
 
+// Adds value as a string, or null if it's empty.
+void api_add_string_or_null(cJSON *object, const char *key, const char *value);
+
 // Sends body as a 200 JSON response and deletes it.
 // A NULL body, or one that can't be printed, means memory ran out and gives a 500.
 esp_err_t api_send_json(httpd_req_t *req, cJSON *body);

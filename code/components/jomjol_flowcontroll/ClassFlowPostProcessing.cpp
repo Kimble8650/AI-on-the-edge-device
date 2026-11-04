@@ -49,6 +49,19 @@ std::string ClassFlowPostProcessing::GetJSON(std::string _lineend) {
     return json;
 }
 
+// doFlow() holds the mutex while it rewrites the results, so a round is never seen half done.
+std::vector<NumberResult> ClassFlowPostProcessing::GetResults() {
+    std::lock_guard<std::mutex> lock(preValueMutex);
+    std::vector<NumberResult> results;
+
+    for (const NumberPost *number : NUMBERS) {
+        results.push_back({number->name, number->ReturnValue, number->ReturnRawValue, number->ReturnPreValue,
+                           number->ErrorMessageText, number->ReturnRateValue, number->timeStamp});
+    }
+
+    return results;
+}
+
 string ClassFlowPostProcessing::getJsonFromNumber(int i, std::string _lineend) {
     std::string json = "";
 

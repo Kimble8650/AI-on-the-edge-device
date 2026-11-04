@@ -953,6 +953,15 @@ string ClassFlowControll::getJSON()
     return "";
 }
 
+std::vector<NumberResult> ClassFlowControll::getNumberResults()
+{
+    if (flowpostprocessing) {
+        return flowpostprocessing->GetResults();
+    }
+
+    return {};
+}
+
 /**
  * @returns a vector of all current sequences (empty while the flow is not initialized)
  **/

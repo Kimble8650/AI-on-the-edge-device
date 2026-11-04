@@ -22,6 +22,18 @@ esp_err_t send_body(httpd_req_t *req, const char *status, const cJSON *body)
 
 } // namespace
 
+void api_add_string_or_null(cJSON *object, const char *key, const char *value)
+{
+    if (value[0] == '\0')
+    {
+        cJSON_AddNullToObject(object, key);
+    }
+    else
+    {
+        cJSON_AddStringToObject(object, key, value);
+    }
+}
+
 esp_err_t api_send_json(httpd_req_t *req, cJSON *body)
 {
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*"); // Reads only, same as the old endpoints
