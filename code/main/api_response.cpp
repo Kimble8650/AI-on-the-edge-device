@@ -42,6 +42,13 @@ esp_err_t api_send_json(httpd_req_t *req, cJSON *body)
     return result;
 }
 
+esp_err_t api_send_accepted(httpd_req_t *req, cJSON *body)
+{
+    esp_err_t result = send_body(req, "202 Accepted", body);
+    cJSON_Delete(body);
+    return result;
+}
+
 esp_err_t api_send_error(httpd_req_t *req, const char *status, const char *code, const char *message)
 {
     cJSON *body = cJSON_CreateObject();

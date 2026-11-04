@@ -1,6 +1,7 @@
 #include "api_router.h"
 
 #include <string>
+#include <strings.h>
 
 #include "api_info.h"
 #include "api_response.h"
@@ -34,6 +35,19 @@ std::string get_route_path(const httpd_req_t *req)
     return path.substr(sizeof(API_PATH_PREFIX) - 1);
 }
 
+// True for application/json, with or without parameters such as charset.
+bool has_json_content_type(httpd_req_t *req)
+{
+    constexpr char JSON_TYPE[] = "application/json";
+    constexpr size_t JSON_TYPE_LENGTH = sizeof(JSON_TYPE) - 1;
+
+    char content_type[32] = ""; // A longer value is cut off, which is enough to see its start
+    httpd_req_get_hdr_value_str(req, "Content-Type", content_type, sizeof(content_type));
+
+    const char next = content_type[JSON_TYPE_LENGTH];
+    return strncasecmp(content_type, JSON_TYPE, JSON_TYPE_LENGTH) == 0 && (next == '\0' || next == ';' || next == ' ');
+}
+
 // Finds the route for the request and calls it. All of /api/v1/ comes through here,
 // so it takes up one URI handler slot however many routes the table has.
 esp_err_t api_router_handler(httpd_req_t *req)
@@ -50,6 +64,13 @@ esp_err_t api_router_handler(httpd_req_t *req)
 
         if (route.method == req->method)
         {
+            // A plain web form can't send this type, and a script on another site needs a CORS preflight for it.
+            // The preflight gets a 405, so other sites can't change anything on the device.
+            if (route.method != HTTP_GET && !has_json_content_type(req))
+            {
+                return api_send_error(req, "415 Unsupported Media Type", "unsupported_media_type", "Content-Type must be application/json");
+            }
+
             return route.handler(req);
         }
 
