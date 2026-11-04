@@ -56,6 +56,42 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
+  /actions/flow-start:
+    post:
+      summary: Start the next round now instead of after the interval
+      description: |
+        Needs `Content-Type: application/json`, even though there's no body.
+        The round is finished once `flow.round` of `/status` has reached `round` and `flow.running` is false.
+      operationId: startFlow
+      responses:
+        "202":
+          description: The round is about to start
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [round]
+                properties:
+                  round:
+                    description: The number of the round that's starting
+                    type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "409":
+          description: |
+            A round is running (`flow_busy`), or automatic rounds aren't active,
+            for example in setup mode (`flow_not_active`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
 components:
   securitySchemes:
     basicAuth:
@@ -92,6 +128,12 @@ components:
           description: Seconds to wait before trying again
           schema:
             type: integer
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    UnsupportedMediaType:
+      description: The request doesn't have `Content-Type application/json`
       content:
         application/json:
           schema:

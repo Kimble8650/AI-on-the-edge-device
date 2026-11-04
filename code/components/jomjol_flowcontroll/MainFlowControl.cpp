@@ -452,6 +452,18 @@ esp_err_t handler_flow_start(httpd_req_t *req)
     return ESP_OK;
 }
 
+bool triggerFlowStart(void)
+{
+    if (!autostartIsEnabled)
+    {
+        return false;
+    }
+
+    xTaskAbortDelay(xHandletask_autodoFlow);
+    LogFile.WriteToFile(ESP_LOG_DEBUG, TAG, "Flow start triggered by REST API /api/v1/actions/flow-start");
+    return true;
+}
+
 #ifdef ENABLE_MQTT
 esp_err_t MQTTCtrlFlowStart(std::string _topic)
 {

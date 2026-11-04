@@ -83,6 +83,9 @@ int getCountFlowRounds(void);
 bool getFlowIsInitialized(void);
 bool getFlowIsRunning(void);
 
+// Starts the next round now instead of after the interval. Returns false if automatic rounds aren't active.
+bool triggerFlowStart(void);
+
 #ifdef ENABLE_MQTT
 esp_err_t MQTTCtrlFlowStart(std::string _topic);
 #endif // ENABLE_MQTT

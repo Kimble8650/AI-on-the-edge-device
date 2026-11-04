@@ -3,6 +3,7 @@
 #include <string>
 #include <strings.h>
 
+#include "api_actions.h"
 #include "api_info.h"
 #include "api_response.h"
 #include "api_status.h"
@@ -23,6 +24,7 @@ struct ApiRoute
 const ApiRoute api_routes[] = {
     {HTTP_GET, "/info", api_info_get_handler},
     {HTTP_GET, "/status", api_status_get_handler},
+    {HTTP_POST, "/actions/flow-start", api_action_flow_start_handler},
 };
 
 constexpr char API_PATH_PREFIX[] = "/api/v1";
