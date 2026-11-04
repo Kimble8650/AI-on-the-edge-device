@@ -8,6 +8,7 @@
 
 #include "api_actions.h"
 #include "api_info.h"
+#include "api_numbers.h"
 #include "api_response.h"
 #include "api_status.h"
 #include "basic_auth.h"
@@ -28,6 +29,7 @@ struct ApiRoute
 const ApiRoute api_routes[] = {
     {HTTP_GET, "/info", api_info_get_handler},
     {HTTP_GET, "/status", api_status_get_handler},
+    {HTTP_PUT, "/numbers/{name}/prevalue", api_number_prevalue_put_handler},
     {HTTP_POST, "/actions/flow-start", api_action_flow_start_handler},
     {HTTP_POST, "/actions/reboot", api_action_reboot_handler},
 #ifdef ENABLE_MQTT

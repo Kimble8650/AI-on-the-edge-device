@@ -140,6 +140,76 @@ paths:
         "415":
           $ref: "#/components/responses/UnsupportedMediaType"
 
+  /numbers/{name}/prevalue:
+    put:
+      summary: Set the last valid reading of a number
+      description: Needs `Content-Type application/json`. The body has either `value` or `use_raw`.
+      operationId: setPreValue
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: The name of the number, as in `numbers` of `/status`
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  description: The new value
+                  type: number
+                  minimum: 0
+                use_raw:
+                  description: True to use the latest raw reading as the new value
+                  type: boolean
+      responses:
+        "200":
+          description: The value is set
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [pre]
+                properties:
+                  pre:
+                    type: number
+        "400":
+          description: The body isn't valid, with the details in `error.fields`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: There's no number with this name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "409":
+          description: The latest raw reading can't be used (`no_valid_raw_value`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "413":
+          description: The body is too long
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
 components:
   securitySchemes:
     basicAuth:
@@ -203,6 +273,17 @@ components:
             message:
               description: Text for people, which may change
               type: string
+            fields:
+              description: The parts of the request body that are wrong, on a 400
+              type: array
+              items:
+                type: object
+                required: [path, message]
+                properties:
+                  path:
+                    type: string
+                  message:
+                    type: string
 
     Info:
       type: object
