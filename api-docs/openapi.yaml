@@ -113,6 +113,33 @@ paths:
         "415":
           $ref: "#/components/responses/UnsupportedMediaType"
 
+  /actions/mqtt-discovery:
+    post:
+      summary: Send the Home Assistant discovery and static topics in the next round
+      description: |
+        Needs `Content-Type: application/json`, even though there's no body.
+        Only in firmware built with MQTT.
+      operationId: mqttDiscovery
+      responses:
+        "202":
+          description: The topics are scheduled
+          content:
+            application/json:
+              schema:
+                type: object
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "409":
+          description: MQTT isn't enabled (`mqtt_not_active`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+
 components:
   securitySchemes:
     basicAuth:

@@ -4,6 +4,11 @@
 #include "MainFlowControl.h"
 #include "server_ota.h"
 
+#ifdef ENABLE_MQTT
+#include "interface_mqtt.h"
+#include "server_mqtt.h"
+#endif // ENABLE_MQTT
+
 namespace
 {
 
@@ -45,3 +50,16 @@ esp_err_t api_action_reboot_handler(httpd_req_t *req)
     doReboot();
     return result;
 }
+
+#ifdef ENABLE_MQTT
+esp_err_t api_action_mqtt_discovery_handler(httpd_req_t *req)
+{
+    if (!getMQTTisEnabled())
+    {
+        return api_send_error(req, STATUS_CONFLICT, "mqtt_not_active", "MQTT isn't enabled");
+    }
+
+    scheduleDiscovery_and_static_Topics();
+    return api_send_accepted(req, cJSON_CreateObject());
+}
+#endif // ENABLE_MQTT

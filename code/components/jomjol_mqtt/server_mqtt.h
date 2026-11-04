@@ -23,6 +23,7 @@ bool publishSystemData(int qos);
 
 std::string getTimeUnit(void);
 void GotConnected(std::string maintopic, bool SetRetainFlag);
+void scheduleDiscovery_and_static_Topics(void);
 esp_err_t sendDiscovery_and_static_Topics(void);
 
 std::string createNodeId(std::string &topic);

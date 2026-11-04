@@ -26,6 +26,9 @@ const ApiRoute api_routes[] = {
     {HTTP_GET, "/status", api_status_get_handler},
     {HTTP_POST, "/actions/flow-start", api_action_flow_start_handler},
     {HTTP_POST, "/actions/reboot", api_action_reboot_handler},
+#ifdef ENABLE_MQTT
+    {HTTP_POST, "/actions/mqtt-discovery", api_action_mqtt_discovery_handler},
+#endif // ENABLE_MQTT
 };
 
 constexpr char API_PATH_PREFIX[] = "/api/v1";

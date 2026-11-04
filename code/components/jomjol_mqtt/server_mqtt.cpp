@@ -312,8 +312,13 @@ bool publishStaticData(int qos) {
 }
 
 
-esp_err_t scheduleSendingDiscovery_and_static_Topics(httpd_req_t *req) {
+void scheduleDiscovery_and_static_Topics(void) {
     sendingOf_DiscoveryAndStaticTopics_scheduled = true;
+}
+
+
+esp_err_t scheduleSendingDiscovery_and_static_Topics(httpd_req_t *req) {
+    scheduleDiscovery_and_static_Topics();
     char msg[] = "MQTT Homeassistant Discovery and Static Topics scheduled";
     httpd_resp_send(req, msg, strlen(msg));  
     return ESP_OK;

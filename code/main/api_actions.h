@@ -11,4 +11,9 @@ esp_err_t api_action_flow_start_handler(httpd_req_t *req);
 // POST /api/v1/actions/reboot: restarts the device a few seconds after answering.
 esp_err_t api_action_reboot_handler(httpd_req_t *req);
 
+#ifdef ENABLE_MQTT
+// POST /api/v1/actions/mqtt-discovery: sends the Home Assistant discovery and static topics in the next round.
+esp_err_t api_action_mqtt_discovery_handler(httpd_req_t *req);
+#endif // ENABLE_MQTT
+
 #endif // API_ACTIONS_H
