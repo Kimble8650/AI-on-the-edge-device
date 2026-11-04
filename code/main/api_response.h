@@ -17,6 +17,9 @@ esp_err_t api_send_json(httpd_req_t *req, cJSON *body);
 // Unlike api_send_json(), it has no CORS header: other sites may read the device but not change it.
 esp_err_t api_send_accepted(httpd_req_t *req, cJSON *body);
 
+// Sends a 503 with Retry-After, for endpoints that need the flow before it's initialized.
+esp_err_t api_send_flow_not_ready(httpd_req_t *req);
+
 // Sends {"error": {"code": ..., "message": ...}} with the given HTTP status line, e.g. "404 Not Found".
 esp_err_t api_send_error(httpd_req_t *req, const char *status, const char *code, const char *message);
 

@@ -49,6 +49,12 @@ esp_err_t api_send_accepted(httpd_req_t *req, cJSON *body)
     return result;
 }
 
+esp_err_t api_send_flow_not_ready(httpd_req_t *req)
+{
+    httpd_resp_set_hdr(req, "Retry-After", "10");
+    return api_send_error(req, "503 Service Unavailable", "flow_not_ready", "The flow isn't initialized yet");
+}
+
 esp_err_t api_send_error(httpd_req_t *req, const char *status, const char *code, const char *message)
 {
     cJSON *body = cJSON_CreateObject();

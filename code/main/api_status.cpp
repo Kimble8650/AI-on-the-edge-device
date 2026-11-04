@@ -9,9 +9,6 @@
 namespace
 {
 
-// How long a client should wait when the flow isn't ready, in seconds
-constexpr char RETRY_AFTER_S[] = "10";
-
 // The flow keeps its results as text, which is empty or not a number when there's no valid value.
 void add_number_or_null(cJSON *object, const char *key, const std::string &text)
 {
@@ -68,8 +65,7 @@ esp_err_t api_status_get_handler(httpd_req_t *req)
 {
     if (!getFlowIsInitialized())
     {
-        httpd_resp_set_hdr(req, "Retry-After", RETRY_AFTER_S);
-        return api_send_error(req, "503 Service Unavailable", "flow_not_ready", "The flow isn't initialized yet");
+        return api_send_flow_not_ready(req);
     }
 
     cJSON *root = cJSON_CreateObject();

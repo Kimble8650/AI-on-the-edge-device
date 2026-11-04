@@ -2,12 +2,10 @@
 
 #include "api_response.h"
 #include "MainFlowControl.h"
+#include "server_ota.h"
 
 namespace
 {
-
-// How long a client should wait when the flow isn't ready, in seconds
-constexpr char RETRY_AFTER_S[] = "10";
 
 constexpr char STATUS_CONFLICT[] = "409 Conflict";
 
@@ -17,8 +15,7 @@ esp_err_t api_action_flow_start_handler(httpd_req_t *req)
 {
     if (!getFlowIsInitialized())
     {
-        httpd_resp_set_hdr(req, "Retry-After", RETRY_AFTER_S);
-        return api_send_error(req, "503 Service Unavailable", "flow_not_ready", "The flow isn't initialized yet");
+        return api_send_flow_not_ready(req);
     }
 
     // Has to be checked first: the flow task also waits inside a round, for example before taking the image,
@@ -39,4 +36,12 @@ esp_err_t api_action_flow_start_handler(httpd_req_t *req)
     cJSON_AddNumberToObject(body, "round", next_round);
 
     return api_send_accepted(req, body);
+}
+
+esp_err_t api_action_reboot_handler(httpd_req_t *req)
+{
+    // The answer has to go out first: doReboot() takes the network down a few seconds later
+    esp_err_t result = api_send_accepted(req, cJSON_CreateObject());
+    doReboot();
+    return result;
 }

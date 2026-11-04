@@ -25,6 +25,7 @@ const ApiRoute api_routes[] = {
     {HTTP_GET, "/info", api_info_get_handler},
     {HTTP_GET, "/status", api_status_get_handler},
     {HTTP_POST, "/actions/flow-start", api_action_flow_start_handler},
+    {HTTP_POST, "/actions/reboot", api_action_reboot_handler},
 };
 
 constexpr char API_PATH_PREFIX[] = "/api/v1";

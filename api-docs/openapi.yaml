@@ -92,6 +92,27 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
+  /actions/reboot:
+    post:
+      summary: Restart the device
+      description: |
+        Needs `Content-Type: application/json`, even though there's no body.
+        The device restarts a few seconds after answering, and `/status` answers again once it's back.
+      operationId: reboot
+      responses:
+        "202":
+          description: The device is about to restart
+          content:
+            application/json:
+              schema:
+                type: object
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+
 components:
   securitySchemes:
     basicAuth:
