@@ -171,12 +171,31 @@
 			$('#timestamp').html("Last Page Refresh:" + (h + ":" + m + ":" + s));
 		}
 
+		var shownRound = -1;
+
+		// Reloads the page content once per round, when the round has finished
 		function Refresh() {
 			setTimeout (function() {
-				LoadData();
-				LoadROIImage();
-				Refresh();
-			}, 300000);
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4) {
+						if (this.status == 200) {
+							var flow = JSON.parse(xhttp.responseText).flow;
+
+							if (!flow.running && flow.round != shownRound) {
+								shownRound = flow.round;
+								LoadData();
+								LoadROIImage();
+							}
+						}
+
+						Refresh();
+					}
+				}
+
+				xhttp.open("GET", domainname + '/api/v1/status', true);
+				xhttp.send();
+			}, 10000);
 		}
 
 		function loadStatus() {
