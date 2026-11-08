@@ -29,6 +29,7 @@
 #include "server_camera.h"
 #include "basic_auth.h"
 #include "api_router.h"
+#include "json_memory.h"
 
 #ifdef ENABLE_MQTT
 #include "server_mqtt.h"
@@ -289,6 +290,9 @@ extern "C" void app_main(void)
     // Init external PSRAM
     // ********************************************
     esp_err_t PSRAMStatus = esp_psram_init();
+
+    // Keep JSON (REST API, MQTT, webhook) out of internal RAM. Falls back to internal RAM without PSRAM.
+    json_memory_prefer_psram();
     if (PSRAMStatus == ESP_FAIL)
     { // ESP_FAIL -> Failed to init PSRAM
         LogFile.WriteToFile(ESP_LOG_ERROR, TAG, "PSRAM init failed (" + std::to_string(PSRAMStatus) + ")! PSRAM not found or defective");
