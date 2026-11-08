@@ -5,6 +5,7 @@
 #include <time.h>
 #include "ClassLogFile.h"
 #include "esp_http_client.h"
+#include "esp_attr.h"
 #include "time_sntp.h"
 #include "../../include/defines.h"
 
@@ -16,7 +17,8 @@ static const char *TAG = "INFLUXDB";
  * This character array is used to store the output of an HTTP response.
  * The size of the buffer is defined by the constant MAX_HTTP_OUTPUT_BUFFER.
  */
-char response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
+// In PSRAM (zeroed at boot like any .bss): internal RAM is the scarce kind.
+EXT_RAM_BSS_ATTR char response_buffer[MAX_HTTP_OUTPUT_BUFFER];
 
 
 /**

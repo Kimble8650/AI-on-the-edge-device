@@ -38,11 +38,9 @@
 
 #include "Helper.h"
 #include "statusled.h"
+#include "esp_heap_caps.h"
 #include "basic_auth.h"
 #include "../../include/defines.h"
-
-/*an ota data write buffer ready to write to the flash*/
-static char ota_write_data[SERVER_OTA_SCRATCH_BUFSIZE + 1] = {0};
 
 static const char *TAG = "OTA";
 
@@ -140,7 +138,9 @@ void CheckUpdate()
     }
 }
 
-static bool ota_update_task(std::string fn)
+// Writes the firmware image in fn to the next OTA partition, reading it through ota_write_data
+// (SERVER_OTA_SCRATCH_BUFSIZE + 1 bytes).
+static bool ota_update_from_file(const std::string &fn, char *ota_write_data)
 {
     ESP_LOGI(TAG, "Starting OTA update");
 
@@ -264,6 +264,27 @@ static bool ota_update_task(std::string fn)
     }
 
     return true;
+}
+
+// Runs the OTA update with a read buffer that exists only during the update.
+static bool ota_update_task(std::string fn)
+{
+    // Internal RAM: flash writes from a PSRAM buffer go through a bounce buffer, which made the flash step
+    // about 50% slower when the buffer was in PSRAM. Allocated here instead of statically, so it costs
+    // internal RAM only while an update runs.
+    char *ota_write_data = static_cast<char *>(
+        heap_caps_malloc_prefer(SERVER_OTA_SCRATCH_BUFSIZE + 1, 2,
+                                MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT,
+                                MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
+    if (ota_write_data == NULL)
+    {
+        LogFile.WriteToFile(ESP_LOG_ERROR, TAG, "No memory for the OTA buffer");
+        return false;
+    }
+
+    bool result = ota_update_from_file(fn, ota_write_data);
+    heap_caps_free(ota_write_data);
+    return result;
 }
 
 static void print_sha256(const uint8_t *image_hash, const char *label)

@@ -14,13 +14,15 @@
 
 #include "Helper.h"
 #include "ClassLogFile.h"
+#include "esp_attr.h"
 #include "../../include/defines.h"
 
 static const char *TAG = "SERVER HELP";
 
 string SUFFIX_ZW = "_tmp";
 
-char scratch[SERVER_HELPER_SCRATCH_BUFSIZE];
+// In PSRAM: internal RAM is the scarce kind, and this buffer only stages data between the SD card and the network.
+EXT_RAM_BSS_ATTR char scratch[SERVER_HELPER_SCRATCH_BUFSIZE];
 
 bool endsWith(std::string const &str, std::string const &suffix)
 {

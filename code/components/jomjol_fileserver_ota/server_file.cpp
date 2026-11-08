@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <memory>
 #include <string>
 #include <sys/param.h>
 #include <sys/unistd.h>
@@ -25,6 +26,7 @@
 #include "esp_vfs.h"
 #include <esp_spiffs.h>
 #include "esp_http_server.h"
+#include "esp_heap_caps.h"
 
 #include "../../include/defines.h"
 #include "ClassLogFile.h"
@@ -693,8 +695,13 @@ static esp_err_t upload_post_handler(httpd_req_t *req)
 
     ESP_LOGI(TAG, "Receiving file: %s...", filename);
 
-    /* Retrieve the pointer to scratch buffer for temporary storage */
-    char *buf = ((struct file_server_data *)req->user_ctx)->scratch;
+    // Receive into internal RAM, only for the length of the upload: SD writes from a PSRAM buffer go through a
+    // bounce buffer and made uploads about 20% slower. Falls back to the shared scratch buffer (PSRAM) if
+    // internal RAM is short. upload_buffer frees the allocation on every return path.
+    std::unique_ptr<char, decltype(&heap_caps_free)> upload_buffer(
+        static_cast<char *>(heap_caps_malloc(SERVER_FILER_SCRATCH_BUFSIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)),
+        heap_caps_free);
+    char *buf = upload_buffer ? upload_buffer.get() : ((struct file_server_data *)req->user_ctx)->scratch;
     int received;
 
     /* Content length of the request gives
@@ -1019,7 +1026,10 @@ void register_server_file_uri(httpd_handle_t server, const char *base_path)
     }
 
     /* Allocate memory for server data */
-    server_data = (file_server_data *)calloc(1, sizeof(struct file_server_data));
+    // PSRAM first: the struct holds a 4 KB scratch buffer that only stages data between the SD card and the network.
+    server_data = (file_server_data *)heap_caps_calloc_prefer(1, sizeof(struct file_server_data), 2,
+                                                              MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT,
+                                                              MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     if (!server_data)
     {
         LogFile.WriteToFile(ESP_LOG_ERROR, TAG, "Failed to allocate memory for server data");
